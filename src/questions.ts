@@ -21,8 +21,8 @@ export function didItResolveOrReject(f: () => Promise<string>): Promise<PromiseS
     // else, return PromiseState.rejected.
     //
     // f is an asynchronous function
-        
-        return f()
+
+    return f()
         .then(
             function resolved() {
                 return PromiseState.resolved
@@ -39,13 +39,13 @@ export function whatAreTheirSquaredResolvedValue(fs: Array<() => Promise<number>
     // Each function fi is an asynchronous function
     // Promise returned by each function fi will not throw an error
     let s = []
-    for(let i = 0; i<fs.length; i++){
+    for (let i = 0; i < fs.length; i++) {
         s.push(fs[i]())
     }
-    return Promise.all(s).then((value)=>{
+    return Promise.all(s).then((value) => {
         let result = value.map(x => x ** 2)
         return result
-    })    
+    })
 }
 
 export function didTheyResolveOrReject(fs: Array<() => Promise<number>>): Promise<Array<PromiseState>> {
@@ -54,7 +54,7 @@ export function didTheyResolveOrReject(fs: Array<() => Promise<number>>): Promis
     //
     // Reminder: You can use PromiseState.resolved and PromiseState.rejected instead of typing the string yourself.
     let s: Array<Promise<PromiseState>> = []
-    for(let i = 0; i<fs.length; i++){
+    for (let i = 0; i < fs.length; i++) {
         s.push(fs[i]().then(
             function resolved() {
                 return PromiseState.resolved
@@ -64,9 +64,9 @@ export function didTheyResolveOrReject(fs: Array<() => Promise<number>>): Promis
             }
         ))
     }
-    return Promise.all(s).then((value)=>{
+    return Promise.all(s).then((value) => {
         return value
-        })
+    })
 }
 
 export function resolveConcurrently(fs: Array<() => Promise<number>>): Promise<Array<number>> {
@@ -77,13 +77,13 @@ export function resolveConcurrently(fs: Array<() => Promise<number>>): Promise<A
     // All promises will resolve and not reject.
 
     let s = []
-    for(let i = 0; i<fs.length; i++){
+    for (let i = 0; i < fs.length; i++) {
         s.push(fs[i]())
     }
-    return Promise.all(s).then((value)=>{
+    return Promise.all(s).then((value) => {
         let result = value.map(x => x ** 2)
         return result
-    })   
+    })
 }
 
 export function resolveSequentially(
@@ -97,36 +97,36 @@ export function resolveSequentially(
     // Pass the resolved value of the promise returned by f2 as parameter to f3
     // Return the squared of the resolved value returned by f3.
     return f1()
-    .then(function (result){
-        return f2(result)
-    })
-    .then(function (newResult){
-        return f3(newResult)
-    })
-    .then(function(finalResult){
-        return finalResult ** 2
-    })
+        .then(function (result) {
+            return f2(result)
+        })
+        .then(function (newResult) {
+            return f3(newResult)
+        })
+        .then(function (finalResult) {
+            return finalResult ** 2
+        })
 }
 
-export function resolveArraySequentially(fs: Array<(x? : number) => Promise<number>>): Promise<number> {
+export function resolveArraySequentially(fs: Array<(x?: number) => Promise<number>>): Promise<number> {
     // Given an array of promises, execute them in order, sequentially.
     // The resolved value of the promise should be passed as parameter to the next function
     // much like in `resolveSequentially`
     //
     // Return the squared of the resolved value returned by the last promise.
-    if(!fs.length){
+    if (!fs.length) {
         return Promise.resolve(0)
     }
 
     var p = fs[0]()
-    for(let i = 1; i<fs.length; i++){
-         p = p
+    for (let i = 1; i < fs.length; i++) {
+        p = p
             .then(function (result) {
-               return fs[i](result)
+                return fs[i](result)
             })
     }
 
-    return p.then(function(result) {
+    return p.then(function (result) {
         return result ** 2
     })
 }
@@ -136,7 +136,7 @@ export function resolveSequentiallyAndConcurrently(
 ): Promise<Array<Array<number>>> {
     // See requirement in README.md
     //check if array is empty
-    if(!fs.length){
+    if (!fs.length) {
         return Promise.resolve([])
     }
     //define an array s to store the resolved individual arrays
@@ -156,17 +156,19 @@ export function resolveSequentiallyAndConcurrently(
         s.push(p) //push the resolved promise into s
     }*/
     let promise = Promise.resolve();
-    for(const func of fs){
-        promise=promise.then(()=>{
-            return func()
-        }).then((result)=>{
-            s.push(result)
-        })
+    for (const func of fs) {
+        for (const innerFunc of func) {
+            promise = promise.then(() => {
+                return innerFunc()
+            }).then((result) => {
+                s.push(result)
+            })
+        }
     }
-    return Promise.all(s).then((value)=>{
+    return Promise.all(s).then((value) => {
         let result = value.map(x => x())
         return result
-    })   
+    })
     //resolve the promises in s concurrently
     /*let promise  = Promise.resolve();
     const results: Array<number> =[]
