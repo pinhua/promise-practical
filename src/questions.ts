@@ -142,7 +142,7 @@ export function resolveSequentiallyAndConcurrently(
     //define an array s to store the resolved individual arrays
     let s: Array<Promise<number>> = []
     //iterate through the main array
-    for(let i = 0; i<fs.length; i++){
+    /*for(let i = 0; i<fs.length; i++){
         var p = fs[i][0]()
         //iterate through each inner array
         for(let j = 1; j<fs[i].length; j++){
@@ -154,9 +154,22 @@ export function resolveSequentiallyAndConcurrently(
             })
         }
         s.push(p) //push the resolved promise into s
-    }
+    }*/
+    let promise = Promise.resolve();
+    for(const i of fs){
+        for(const j of i)
+        promise = promise.then(()=>{
+            return j();
+        }).then((result)=>{
+            s.push(result)
+        })
+    } 
+    return Promise.all(s).then((value)=>{
+        let result = value.map(x => x())
+        return result
+    })   
     //resolve the promises in s concurrently
-    let promise  = Promise.resolve();
+    /*let promise  = Promise.resolve();
     const results: Array<number> =[]
     for(let i = 0; i<s.length; i++){
         promise = promise.then(() =>{
@@ -167,5 +180,5 @@ export function resolveSequentiallyAndConcurrently(
     }
     return promise.then(() =>{
         return results
-    })
+    })*/
 }
