@@ -156,14 +156,13 @@ export function resolveSequentiallyAndConcurrently(
         s.push(p) //push the resolved promise into s
     }*/
     let promise = Promise.resolve();
-    for(const i of fs){
-        for(const j of i)
-        promise = promise.then(()=>{
-            return j();
+    for(const func of fs){
+        promise=promise.then(()=>{
+            return func()
         }).then((result)=>{
             s.push(result)
         })
-    } 
+    }
     return Promise.all(s).then((value)=>{
         let result = value.map(x => x())
         return result
